@@ -1,92 +1,105 @@
-// Add the Calculator APIs
-
-const express = require('express');
-const path = require('path');
+const express = require("express");
+const path = require("path");
 
 const app = express();
 
 app.use(express.static(__dirname));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname + '/main.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname + "/main.html"));
 });
 
-// ----- CALCULATOR LOGIC -----
-const LIMIT = 1000000;
-const MIN_LIMIT = -1000000;
+// ----- CONSTANTS -----
+const MAX = 1000000;
+const MIN = -1000000;
 
-function validate(num1, num2, result) {
-  if (typeof num1 !== 'number' || typeof num2 !== 'number') {
+function validateInputs(num1, num2, result) {
+  if (typeof num1 !== "number" || typeof num2 !== "number") {
     return { status: "error", message: "Invalid data types" };
   }
-  if (num1 > LIMIT || num2 > LIMIT || result > LIMIT) {
-    return { status: "error", message: "Overflow" };
-  }
-  if (num1 < MIN_LIMIT || num2 < MIN_LIMIT || result < MIN_LIMIT) {
+  if (num1 < MIN || num2 < MIN || result < MIN) {
     return { status: "error", message: "Underflow" };
+  }
+  if (num1 > MAX || num2 > MAX || result > MAX) {
+    return { status: "error", message: "Overflow" };
   }
   return null;
 }
 
-// /add
-app.post('/add', (req, res) => {
+// ----- ADDITION -----
+app.post("/add", (req, res) => {
   const { num1, num2 } = req.body;
   const sum = num1 + num2;
-  const error = validate(num1, num2, sum);
+
+  const error = validateInputs(num1, num2, sum);
   if (error) return res.status(400).json(error);
-  res.json({
+
+  res.status(200).json({
     status: "success",
     message: "the sum of given two numbers",
-    sum
+    sum: sum,
   });
 });
 
-// /sub
-app.post('/sub', (req, res) => {
+// ----- SUBTRACTION -----
+app.post("/sub", (req, res) => {
   const { num1, num2 } = req.body;
   const difference = num1 - num2;
-  const error = validate(num1, num2, difference);
+
+  const error = validateInputs(num1, num2, difference);
   if (error) return res.status(400).json(error);
-  res.json({
+
+  res.status(200).json({
     status: "success",
     message: "the difference of given two numbers",
-    difference
+    difference: difference,
   });
 });
 
-// /multiply
-app.post('/multiply', (req, res) => {
+// ----- MULTIPLICATION -----
+app.post("/multiply", (req, res) => {
   const { num1, num2 } = req.body;
   const result = num1 * num2;
-  const error = validate(num1, num2, result);
+
+  const error = validateInputs(num1, num2, result);
   if (error) return res.status(400).json(error);
-  res.json({
+
+  res.status(200).json({
     status: "success",
     message: "The product of given numbers",
-    result
+    result: result,
   });
 });
 
-// /divide
-app.post('/divide', (req, res) => {
+// ----- DIVISION -----
+app.post("/divide", (req, res) => {
   const { num1, num2 } = req.body;
+
+  if (typeof num1 !== "number" || typeof num2 !== "number") {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid data types",
+    });
+  }
+
   if (num2 === 0) {
     return res.status(400).json({
       status: "error",
-      message: "Cannot divide by zero"
+      message: "Cannot divide by zero",
     });
   }
+
   const result = num1 / num2;
-  const error = validate(num1, num2, result);
+
+  const error = validateInputs(num1, num2, result);
   if (error) return res.status(400).json(error);
-  res.json({
+
+  res.status(200).json({
     status: "success",
     message: "The division of given numbers",
-    result
+    result: result,
   });
 });
-
-// ----- END LOGIC -----
 
 module.exports = app;
